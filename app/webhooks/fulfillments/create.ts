@@ -1,6 +1,7 @@
 import { sendWhatsAppMessage } from "../../utils/whatsapp";
 import { whatsappTemplates } from "../../config/whatsappTemplates";
-import { authenticate } from "../../shopify.server";
+import { formatPhoneNumber, isValidPhoneNumber } from "../../utils/phone";
+import { sessionStorage } from "../../shopify.server";
 
 interface ShopifyFulfillment {
     id: number;
@@ -50,11 +51,12 @@ export default async function fulfillmentsCreate(topic: string, shop: string, bo
                 trackingUrl,
             });
 
-            // Send WhatsApp notification
-            if (orderDetails.customerPhone) {
+            // Send WhatsApp notification if we have a valid phone number
+            if (orderDetails.customerPhone && isValidPhoneNumber(orderDetails.customerPhone)) {
+                const formattedPhone = formatPhoneNumber(orderDetails.customerPhone);
                 try {
                     await sendWhatsAppMessage({
-                        to: orderDetails.customerPhone,
+                        to: formattedPhone,
                         message,
                     });
                     console.log(`Successfully sent WhatsApp notification for fulfillment ${fulfillmentId}`);
@@ -63,7 +65,7 @@ export default async function fulfillmentsCreate(topic: string, shop: string, bo
                     // Don't throw here to prevent webhook failure
                 }
             } else {
-                console.warn(`No phone number found for order ${orderId}`);
+                console.warn(`No valid phone number found for order ${orderId}`);
             }
         } catch (apiError) {
             console.error(`Error retrieving order details for order ${orderId}:`, apiError);
@@ -79,34 +81,58 @@ export default async function fulfillmentsCreate(topic: string, shop: string, bo
 
 async function getOrderDetails(orderId: string, shop: string): Promise<OrderDetails | null> {
     try {
-        // Create a fake request object for authentication
-        const fakeRequest = new Request(`https://${shop}/admin/api`, {
-            headers: {
-                'X-Shopify-Shop-Domain': shop,
-            },
+        // Get the offline session from storage
+        const session = await sessionStorage.findSessionsByShop(shop);
+        
+        if (!session || session.length === 0) {
+            throw new Error(`No session found for shop ${shop}`);
+        }
+
+        // Use the first valid session
+        const accessToken = session[0].accessToken;
+        
+        if (!accessToken) {
+            throw new Error('No access token found in session');
+        }
+
+        const headers = new Headers({
+            'Content-Type': 'application/json',
+            'X-Shopify-Access-Token': accessToken,
         });
 
-        const { admin } = await authenticate.admin(fakeRequest);
-        
-        const response = await admin.graphql(
-            `query getOrder($id: ID!) {
-                order(id: $id) {
-                    id
-                    name
-                    customer {
-                        phone
+        const response = await fetch(`https://${shop}/admin/api/2024-01/graphql.json`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+                query: `
+                    query getOrder($id: ID!) {
+                        order(id: $id) {
+                            id
+                            name
+                            customer {
+                                phone
+                            }
+                        }
                     }
-                }
-            }`,
-            {
+                `,
                 variables: {
                     id: `gid://shopify/Order/${orderId}`,
                 },
-            },
-        );
+            }),
+        });
 
-        const responseJson = await response.json();
-        const order = responseJson.data?.order;
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const { data, errors } = await response.json();
+
+        if (errors?.length > 0) {
+            console.error("GraphQL Errors:", errors);
+            throw new Error("GraphQL query failed");
+        }
+
+        const order = data?.order;
 
         if (!order) {
             return null;
