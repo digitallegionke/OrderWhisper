@@ -6,9 +6,8 @@ import {
   DeliveryMethod,
   LATEST_API_VERSION,
 } from "@shopify/shopify-app-remix/server";
-import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
-import prisma from "./db.server";
-import { webhookRateLimiter } from "./middleware/rateLimiter";
+import { RedisSessionStorage } from "@shopify/shopify-app-session-storage-redis";
+import { config } from "../config/development";
 import { orderCreatedWebhook } from "./webhooks/orders-create";
 import { fulfillmentCreatedWebhook } from "./webhooks/fulfillments-create";
 
@@ -19,6 +18,9 @@ const scopes = [
   "write_fulfillments",
 ];
 
+// Initialize Redis session storage
+const sessionStorage = new RedisSessionStorage(config.redis.url);
+
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
@@ -26,7 +28,7 @@ const shopify = shopifyApp({
   scopes,
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
-  sessionStorage: new PrismaSessionStorage(prisma),
+  sessionStorage,
   distribution: AppDistribution.AppStore,
   webhooks: {
     APP_UNINSTALLED: {
@@ -52,4 +54,4 @@ export const authenticate = shopify.authenticate;
 export const unauthenticated = shopify.unauthenticated;
 export const login = shopify.login;
 export const registerWebhooks = shopify.registerWebhooks;
-export const sessionStorage = shopify.sessionStorage;
+export { sessionStorage };
