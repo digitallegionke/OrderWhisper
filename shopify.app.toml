@@ -1,0 +1,46 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "10cd0ca9a3d009f3c94cedcd57d64839"
+application_url = "https://architects-lending-nowhere-legends.trycloudflare.com"
+embedded = true
+name = "OrderWhisper"
+handle = "orderwhisper"
+
+[build]
+include_config_on_deploy = true
+automatically_update_urls_on_dev = true
+
+[webhooks]
+api_version = "2025-01"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+  [[webhooks.subscriptions]]
+  topics = [ "orders/create" ]
+  uri = "/webhooks/orders/create"
+  include_fields = ["id", "order_number", "customer"]
+
+  [[webhooks.subscriptions]]
+  topics = [ "fulfillments/create" ]
+  uri = "/webhooks/fulfillments/create"
+  include_fields = ["order_id", "order"]
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products,read_orders,write_fulfillments"
+
+[auth]
+redirect_urls = [
+  "https://architects-lending-nowhere-legends.trycloudflare.com/auth/callback",
+  "https://architects-lending-nowhere-legends.trycloudflare.com/auth/shopify/callback",
+  "https://architects-lending-nowhere-legends.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false
