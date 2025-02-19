@@ -1,17 +1,41 @@
+import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
+
+interface WhatsAppResponse {
+    messaging_product: string;
+    contacts: Array<{ wa_id: string }>;
+    messages: Array<{ id: string }>;
+}
+
+interface WhatsAppError {
+    error: {
+        message: string;
+        type: string;
+        code: number;
+        fbtrace_id: string;
+    };
+}
+
 export default async function sendWhatsAppMessage(
     phoneNumber: string,
     message: string,
     whatsappPhoneNumberId: string,
     whatsappAccessToken: string
-): Promise<any> {
+): Promise<WhatsAppResponse> {
     try {
-        // Format phone number to remove any special characters and ensure it starts with country code
-        const formattedPhone = phoneNumber.replace(/\D/g, '');
-        let finalPhone = formattedPhone;
-        if (!formattedPhone.startsWith('254')) {
-            // Add Kenya country code if not present
-            finalPhone = `254${formattedPhone.replace(/^0+/, '')}`;
+        // Parse and validate phone number
+        let parsedNumber;
+        try {
+            parsedNumber = parsePhoneNumber(phoneNumber, 'KE');
+            if (!parsedNumber || !isValidPhoneNumber(parsedNumber.number)) {
+                throw new Error(`Invalid phone number: ${phoneNumber}`);
+            }
+        } catch (error) {
+            console.error('Phone number parsing error:', error);
+            throw new Error(`Invalid phone number format: ${phoneNumber}`);
         }
+
+        // Format phone number to E.164 format without the '+' symbol
+        const finalPhone = parsedNumber.number.replace('+', '');
 
         const response = await fetch(`https://graph.facebook.com/v17.0/${whatsappPhoneNumberId}/messages`, {
             method: 'POST',
@@ -29,14 +53,16 @@ export default async function sendWhatsAppMessage(
             })
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`WhatsApp API error: ${JSON.stringify(errorData)}`);
+            const errorData = data as WhatsAppError;
+            console.error('WhatsApp API error:', errorData);
+            throw new Error(`WhatsApp API error: ${errorData.error.message}`);
         }
 
-        const data = await response.json();
         console.log('WhatsApp message sent successfully:', data);
-        return data;
+        return data as WhatsAppResponse;
     } catch (error) {
         console.error('Failed to send WhatsApp message:', error);
         throw error;
