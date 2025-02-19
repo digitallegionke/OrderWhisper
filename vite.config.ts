@@ -1,13 +1,9 @@
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 import { vitePlugin as remix } from "@remix-run/dev";
 import { installGlobals } from "@remix-run/node";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 installGlobals();
-
-const FRONTEND_PORT = parseInt(process.env.FRONTEND_PORT || '3000', 10);
-const HMR_HOST = process.env.HMR_HOST || 'localhost';
-const HMR_PORT = parseInt(process.env.HMR_PORT || '64999', 10);
 
 // Related: https://github.com/remix-run/remix/issues/2835#issuecomment-1144102176
 // Replace the HOST env var with SHOPIFY_APP_URL so that it doesn't break the remix server. The CLI will eventually
@@ -21,35 +17,14 @@ if (
   delete process.env.HOST;
 }
 
-const host = new URL(process.env.SHOPIFY_APP_URL || "http://localhost")
-  .hostname;
-
-let hmrConfig;
-if (host === "localhost") {
-  hmrConfig = {
-    protocol: "ws",
-    host: "localhost",
-    port: 64999,
-    clientPort: 64999,
-  };
-} else {
-  hmrConfig = {
-    protocol: "wss",
-    host: host,
-    port: parseInt(process.env.FRONTEND_PORT!) || 8002,
-    clientPort: 443,
-  };
-}
-
 export default defineConfig({
-  plugins: [remix(), tsconfigPaths()],
   server: {
-    port: FRONTEND_PORT,
+    port: Number(process.env.PORT || 3000),
     host: true,
     hmr: {
       protocol: 'ws',
-      host: HMR_HOST,
-      port: HMR_PORT,
+      host: 'localhost',
+      port: 64999,
     },
     fs: {
       allow: ["app", "node_modules"],
@@ -57,7 +32,8 @@ export default defineConfig({
     allowedHosts: [
       "56e3-197-237-117-29.ngrok-free.app",
       "architects-lending-nowhere-legends.trycloudflare.com",
-      "merger-appointment-guest-wc.trycloudflare.com"
+      "merger-appointment-guest-wc.trycloudflare.com",
+      "orderwhisper.myshopify.com"
     ],
     cors: true,
     headers: {
@@ -66,8 +42,25 @@ export default defineConfig({
       "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, ngrok-skip-browser-warning",
     },
   },
+  plugins: [
+    remix({
+      ignoredRouteFiles: ["**/.*"],
+      future: {
+        v3_fetcherPersist: true,
+        v3_relativeSplatPath: true,
+        v3_throwAbortReason: true,
+        v3_lazyRouteDiscovery: true,
+        v3_singleFetch: false,
+        v3_routeConfig: true,
+      },
+    }),
+    tsconfigPaths(),
+  ],
   build: {
     cssMinify: process.env.NODE_ENV === "production",
     assetsInlineLimit: 0,
+    rollupOptions: {
+      external: ['@shopify/shopify-api'],
+    }
   },
 });

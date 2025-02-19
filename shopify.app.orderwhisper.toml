@@ -5,10 +5,8 @@ client_id = "10cd0ca9a3d009f3c94cedcd57d64839"
 application_url = "https://merger-appointment-guest-wc.trycloudflare.com"
 embedded = true
 handle = "orderwhisper"
-
 scopes = "read_orders,write_orders,read_fulfillments,write_fulfillments"
-
-extension_directories = []
+extension_directories = [ ]
 
 [build]
 include_config_on_deploy = true
@@ -29,14 +27,15 @@ api_version = "2024-01"
   [[webhooks.subscriptions]]
   topics = [ "orders/create" ]
   uri = "/webhooks/orders/create"
-  include_fields = ["id", "order_number", "customer"]
+  include_fields = [ "id", "order_number", "customer" ]
 
   [[webhooks.subscriptions]]
   topics = [ "fulfillments/create" ]
   uri = "/webhooks/fulfillments/create"
-  include_fields = ["order_id", "order"]
+  include_fields = [ "order_id", "order" ]
 
 [access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "read_orders,write_orders,read_fulfillments,write_fulfillments"
 
 [auth]
