@@ -1,4 +1,4 @@
-import sendWhatsAppMessage from '../../helperFunctions/sendWhatsAppMessage';
+import { sendWhatsAppMessage } from "../../utils/whatsapp";
 
 interface ShopifyFulfillment {
     order_id: number;
@@ -9,34 +9,42 @@ interface ShopifyFulfillment {
     };
 }
 
-export default async function fulfillmentsCreate(topic: string, shop: string, body: string) {
+export default async function fulfillmentsCreate(topic: string, shop: string, body: string, webhookId: string) {
+    const payload = JSON.parse(body);
+    
     try {
-        const fulfillment = JSON.parse(body) as ShopifyFulfillment;
-        const orderId = fulfillment.order_id;
-        const phone = fulfillment.order?.customer?.phone;
-        const whatsappPhoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-        const whatsappAccessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+        // Extract relevant fulfillment information
+        const fulfillmentId = payload.id;
+        const orderId = payload.order_id;
+        const trackingNumber = payload.tracking_number;
+        const trackingUrl = payload.tracking_url;
+        const orderDetails = await getOrderDetails(orderId, shop);
+        
+        // Prepare WhatsApp message
+        const message = `Order #${orderDetails.orderNumber} Update!\n\n` +
+            `Status: Order shipped\n` +
+            (trackingNumber ? `Tracking Number: ${trackingNumber}\n` : '') +
+            (trackingUrl ? `Track your order: ${trackingUrl}` : '');
 
-        if (!whatsappPhoneNumberId || !whatsappAccessToken) {
-            throw new Error('WhatsApp configuration is missing. Please check WHATSAPP_PHONE_NUMBER_ID and WHATSAPP_ACCESS_TOKEN environment variables.');
+        // Send WhatsApp notification
+        if (orderDetails.customerPhone) {
+            await sendWhatsAppMessage({
+                to: orderDetails.customerPhone,
+                message: message,
+            });
         }
 
-        if (!orderId) {
-            throw new Error('Required fulfillment fields are missing. Please check webhook include_fields configuration.');
-        }
-
-        if (phone) {
-            const message = `Your order #${orderId} has been dispatched! Expect delivery soon.`;
-
-            await sendWhatsAppMessage(phone, message, whatsappPhoneNumberId, whatsappAccessToken);
-            console.log(`WhatsApp message sent for order #${orderId} fulfillment`);
-        } else {
-            console.warn(`No phone number found for order ${orderId}`);
-        }
-
-        console.log('Successfully handled fulfillments/create webhook');
+        console.log(`Successfully processed fulfillment ${fulfillmentId} webhook`);
     } catch (error) {
-        console.error('Failed to handle fulfillments/create webhook:', error);
-        throw error; // Rethrow to ensure Shopify knows the webhook failed
+        console.error("Error processing fulfillment webhook:", error);
+        throw error;
     }
+}
+
+async function getOrderDetails(orderId: string, shop: string) {
+    // TODO: Implement order details retrieval using Shopify Admin API
+    return {
+        orderNumber: "placeholder",
+        customerPhone: process.env.CUSTOMER_SUPPORT_PHONE_NUMBER,
+    };
 }

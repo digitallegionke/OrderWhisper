@@ -1,4 +1,4 @@
-import sendWhatsAppMessage from '../../helperFunctions/sendWhatsAppMessage';
+import { sendWhatsAppMessage } from "../../utils/whatsapp";
 
 interface ShopifyOrder {
     id: number;
@@ -8,33 +8,68 @@ interface ShopifyOrder {
     };
 }
 
-export default async function ordersCreate(topic: string, shop: string, body: string) {
+export default async function ordersCreate(topic: string, shop: string, body: string, webhookId: string) {
+    const payload = JSON.parse(body);
+    
     try {
-        const order = JSON.parse(body) as ShopifyOrder;
-        const phone = order.customer?.phone;
-        const whatsappPhoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-        const whatsappAccessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+        // Extract relevant order information
+        const orderId = payload.id;
+        const customerEmail = payload.email;
+        const customerPhone = payload.phone || payload.customer?.phone;
+        const orderNumber = payload.order_number;
+        const totalPrice = payload.total_price;
+        
+        // Prepare WhatsApp message
+        const message = `New Order #${orderNumber}!\n\n` +
+            `Amount: $${totalPrice}\n` +
+            `Customer: ${customerEmail}\n` +
+            `Status: Order received`;
 
-        if (!whatsappPhoneNumberId || !whatsappAccessToken) {
-            throw new Error('WhatsApp configuration is missing. Please check WHATSAPP_PHONE_NUMBER_ID and WHATSAPP_ACCESS_TOKEN environment variables.');
+        // Send WhatsApp notification
+        if (customerPhone) {
+            await sendWhatsAppMessage({
+                to: customerPhone,
+                message: message,
+            });
         }
 
-        if (!order.id || !order.order_number) {
-            throw new Error('Required order fields are missing. Please check webhook include_fields configuration.');
-        }
-
-        if (phone) {
-            const message = `Thank you for your order! Order #${order.order_number} has been placed.`;
-
-            await sendWhatsAppMessage(phone, message, whatsappPhoneNumberId, whatsappAccessToken);
-            console.log(`WhatsApp message sent for order #${order.order_number}`);
-        } else {
-            console.warn(`No phone number found for order #${order.order_number}`);
-        }
-
-        console.log('Successfully handled orders/create webhook');
+        console.log(`Successfully processed order ${orderId} webhook`);
     } catch (error) {
-        console.error('Failed to handle orders/create webhook:', error);
-        throw error; // Rethrow to ensure Shopify knows the webhook failed
+        console.error("Error processing order webhook:", error);
+        throw error;
+    }
+}
+
+async function sendWhatsAppMessage({ to, message }: { to: string; message: string }) {
+    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+    const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+
+    try {
+        const response = await fetch(
+            `https://graph.facebook.com/v17.0/${phoneNumberId}/messages`,
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    messaging_product: "whatsapp",
+                    to: to,
+                    type: "text",
+                    text: { body: message },
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`WhatsApp API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error sending WhatsApp message:", error);
+        throw error;
     }
 }
