@@ -8,14 +8,22 @@ import {
 } from "@shopify/shopify-app-remix/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
-import ordersCreate from "./webhooks/orders/create";
-import fulfillmentsCreate from "./webhooks/fulfillments/create";
+import { webhookRateLimiter } from "./middleware/rateLimiter";
+import { orderCreatedWebhook } from "./webhooks/orders-create";
+import { fulfillmentCreatedWebhook } from "./webhooks/fulfillments-create";
+
+const scopes = [
+  "read_orders",
+  "write_orders",
+  "read_fulfillments",
+  "write_fulfillments",
+];
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
   apiVersion: ApiVersion.January25,
-  scopes: process.env.SCOPES?.split(","),
+  scopes,
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
   sessionStorage: new PrismaSessionStorage(prisma),
@@ -25,16 +33,8 @@ const shopify = shopifyApp({
       deliveryMethod: DeliveryMethod.Http,
       callbackUrl: "/webhooks/app/uninstalled",
     },
-    ORDERS_CREATE: {
-      deliveryMethod: DeliveryMethod.Http,
-      callbackUrl: "/api/webhooks/orders/create",
-      callback: ordersCreate,
-    },
-    FULFILLMENTS_CREATE: {
-      deliveryMethod: DeliveryMethod.Http,
-      callbackUrl: "/api/webhooks/fulfillments/create",
-      callback: fulfillmentsCreate,
-    },
+    ORDERS_CREATE: orderCreatedWebhook,
+    FULFILLMENTS_CREATE: fulfillmentCreatedWebhook,
   },
   future: {
     unstable_newEmbeddedAuthStrategy: true,
