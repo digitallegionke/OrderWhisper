@@ -1,8 +1,8 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 name = "OrderWhisper"
-client_id = "8d6d56b5c590e91f6c2f72a31f3a62a5"
-application_url = "https://architects-lending-nowhere-legends.trycloudflare.com"
+client_id = "10cd0ca9a3d009f3c94cedcd57d64839"
+application_url = "https://merger-appointment-guest-wc.trycloudflare.com"
 embedded = true
 handle = "orderwhisper"
 
@@ -37,14 +37,13 @@ api_version = "2024-01"
   include_fields = ["order_id", "order"]
 
 [access_scopes]
-# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "read_orders,write_orders,read_fulfillments,write_fulfillments"
 
 [auth]
 redirect_urls = [
-  "https://architects-lending-nowhere-legends.trycloudflare.com/auth/callback",
-  "https://architects-lending-nowhere-legends.trycloudflare.com/auth/shopify/callback",
-  "https://architects-lending-nowhere-legends.trycloudflare.com/api/auth/callback"
+  "https://merger-appointment-guest-wc.trycloudflare.com/auth/callback",
+  "https://merger-appointment-guest-wc.trycloudflare.com/auth/shopify/callback",
+  "https://merger-appointment-guest-wc.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

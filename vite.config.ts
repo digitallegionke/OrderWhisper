@@ -52,10 +52,13 @@ export default defineConfig({
       port: HMR_PORT,
     },
     fs: {
-      // See https://vitejs.dev/config/server-options.html#server-fs-allow for more information
       allow: ["app", "node_modules"],
     },
-    allowedHosts: ["56e3-197-237-117-29.ngrok-free.app"],
+    allowedHosts: [
+      "56e3-197-237-117-29.ngrok-free.app",
+      "architects-lending-nowhere-legends.trycloudflare.com",
+      "merger-appointment-guest-wc.trycloudflare.com"
+    ],
     cors: true,
     headers: {
       "Access-Control-Allow-Origin": "*",
