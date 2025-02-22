@@ -44,18 +44,49 @@ npm run dev
 
 ## Production Deployment
 
-### Option 1: Deploy to Heroku
+### Option 1: Deploy to Railway
 
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/orderwhisper)
 
-1. Click the "Deploy to Heroku" button above
-2. Fill in the required environment variables:
+1. Click the "Deploy on Railway" button above
+2. Create a new Railway account or log in
+3. Fill in the required environment variables:
    - SHOPIFY_API_KEY: Your Shopify API key
    - SHOPIFY_API_SECRET: Your Shopify API secret
    - WHATSAPP_PHONE_NUMBER_ID: Your WhatsApp Business phone number ID
    - WHATSAPP_ACCESS_TOKEN: Your WhatsApp Business API token
-3. Click "Deploy"
-4. Once deployed, update your Shopify app settings with the new Heroku URL
+4. Click "Deploy"
+5. Once deployed, update your Shopify app settings with the new Railway URL
+
+### Manual Railway Deployment
+
+1. Install Railway CLI:
+```bash
+npm install -g @railway/cli
+```
+
+2. Login to Railway:
+```bash
+railway login
+```
+
+3. Create a new project:
+```bash
+railway init
+```
+
+4. Set up environment variables:
+```bash
+railway vars set SHOPIFY_API_KEY=your_api_key
+railway vars set SHOPIFY_API_SECRET=your_api_secret
+railway vars set WHATSAPP_PHONE_NUMBER_ID=your_whatsapp_id
+railway vars set WHATSAPP_ACCESS_TOKEN=your_whatsapp_token
+```
+
+5. Deploy the app:
+```bash
+railway up
+```
 
 ### Option 2: Manual Deployment
 
