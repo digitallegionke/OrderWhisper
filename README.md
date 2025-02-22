@@ -8,6 +8,9 @@ A Shopify app that sends WhatsApp notifications for order updates.
 - WhatsApp notifications for order fulfillment
 - Customizable notification settings
 - Secure WhatsApp Business API integration
+- Health check endpoint for monitoring
+- Built-in error tracking and logging
+- Production-ready deployment configurations
 
 ## Prerequisites
 
@@ -124,11 +127,40 @@ npm start
    - Create a test order
    - Check WhatsApp notifications
    - Verify webhook functionality
+   - Test health check endpoint (/healthcheck)
 
 3. Monitor the app:
    - Check server logs
    - Monitor WhatsApp API usage
    - Track order notifications
+   - Set up alerts for health check failures
+   - Configure error tracking (e.g., Sentry)
+   - Set up performance monitoring
+
+## Production Monitoring
+
+The app includes built-in monitoring capabilities:
+
+1. Health Check:
+   - Endpoint: `/healthcheck`
+   - Monitors: Application status, database connectivity
+   - Recommended: Set up uptime monitoring (e.g., UptimeRobot)
+
+2. Error Tracking:
+   - Built-in error logging
+   - Ready for integration with error tracking services
+   - Supports context and metadata
+
+3. Performance Metrics:
+   - Request timing
+   - WhatsApp API latency
+   - Database performance
+   - Memory usage
+
+4. Logging:
+   - Structured JSON logs
+   - Timestamp and correlation IDs
+   - Ready for log aggregation services
 
 ## Security Considerations
 
@@ -137,6 +169,9 @@ npm start
 - Regularly rotate your API keys and tokens
 - Use HTTPS in production
 - Follow Shopify's security best practices
+- Monitor for unusual activity
+- Set up rate limiting for webhooks
+- Enable security alerts
 
 ## Contributing
 
