@@ -47,48 +47,41 @@ npm run dev
 
 ## Production Deployment
 
-### Option 1: Deploy to Railway
+### Option 1: Deploy to DigitalOcean (Recommended)
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/orderwhisper)
+[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/yourusername/orderwhisper/tree/main)
 
-1. Click the "Deploy on Railway" button above
-2. Create a new Railway account or log in
-3. Fill in the required environment variables:
+1. Click the "Deploy to DigitalOcean" button above
+2. Create a DigitalOcean account or log in
+3. The app.yaml configuration will be automatically loaded
+4. Fill in the required environment variables:
    - SHOPIFY_API_KEY: Your Shopify API key
    - SHOPIFY_API_SECRET: Your Shopify API secret
    - WHATSAPP_PHONE_NUMBER_ID: Your WhatsApp Business phone number ID
    - WHATSAPP_ACCESS_TOKEN: Your WhatsApp Business API token
-4. Click "Deploy"
-5. Once deployed, update your Shopify app settings with the new Railway URL
+5. Choose your deployment region
+6. Click "Deploy to DigitalOcean"
 
-### Manual Railway Deployment
+### Manual DigitalOcean Deployment
 
-1. Install Railway CLI:
+1. Install doctl (DigitalOcean CLI):
 ```bash
-npm install -g @railway/cli
+brew install doctl # macOS
 ```
 
-2. Login to Railway:
+2. Authenticate with DigitalOcean:
 ```bash
-railway login
+doctl auth init
 ```
 
-3. Create a new project:
+3. Create a new app:
 ```bash
-railway init
+doctl apps create --spec app.yaml
 ```
 
 4. Set up environment variables:
 ```bash
-railway vars set SHOPIFY_API_KEY=your_api_key
-railway vars set SHOPIFY_API_SECRET=your_api_secret
-railway vars set WHATSAPP_PHONE_NUMBER_ID=your_whatsapp_id
-railway vars set WHATSAPP_ACCESS_TOKEN=your_whatsapp_token
-```
-
-5. Deploy the app:
-```bash
-railway up
+doctl apps update YOUR_APP_ID --set-env-vars "SHOPIFY_API_KEY=your_key,SHOPIFY_API_SECRET=your_secret"
 ```
 
 ### Option 2: Manual Deployment
@@ -130,7 +123,7 @@ npm start
    - Test health check endpoint (/healthcheck)
 
 3. Monitor the app:
-   - Check server logs
+   - Check server logs in DigitalOcean dashboard
    - Monitor WhatsApp API usage
    - Track order notifications
    - Set up alerts for health check failures
@@ -144,10 +137,12 @@ The app includes built-in monitoring capabilities:
 1. Health Check:
    - Endpoint: `/healthcheck`
    - Monitors: Application status, database connectivity
-   - Recommended: Set up uptime monitoring (e.g., UptimeRobot)
+   - Automatically monitored by DigitalOcean
+   - Alerts on health check failures
 
 2. Error Tracking:
    - Built-in error logging
+   - Logs viewable in DigitalOcean dashboard
    - Ready for integration with error tracking services
    - Supports context and metadata
 
@@ -156,22 +151,27 @@ The app includes built-in monitoring capabilities:
    - WhatsApp API latency
    - Database performance
    - Memory usage
+   - CPU utilization tracking
+   - Automatic scaling triggers
 
 4. Logging:
    - Structured JSON logs
    - Timestamp and correlation IDs
-   - Ready for log aggregation services
+   - Log forwarding to external services
+   - Log retention and search
 
 ## Security Considerations
 
 - Never commit environment files (.env, .env.production) to version control
 - Keep your WhatsApp Business API credentials secure
 - Regularly rotate your API keys and tokens
-- Use HTTPS in production
+- Use HTTPS in production (automatically configured by DigitalOcean)
 - Follow Shopify's security best practices
 - Monitor for unusual activity
 - Set up rate limiting for webhooks
 - Enable security alerts
+- Regular database backups (automated by DigitalOcean)
+- SSL/TLS certificate management (automated by DigitalOcean)
 
 ## Contributing
 

@@ -13,6 +13,7 @@ database.sqlite
 .env
 .env.*
 !.env.example
+!.env.render
 
 /extensions/*/dist
 
@@ -22,3 +23,6 @@ database.sqlite
 
 *.log
 .DS_Store
+
+# Render specific
+.render-buildlogs/

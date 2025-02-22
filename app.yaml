@@ -1,0 +1,38 @@
+name: orderwhisper
+services:
+- name: web
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: yourusername/orderwhisper
+  build_command: npm run build
+  run_command: npm start
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: SHOPIFY_API_KEY
+    value: ""
+    type: SECRET
+  - key: SHOPIFY_API_SECRET
+    value: ""
+    type: SECRET
+  - key: WHATSAPP_PHONE_NUMBER_ID
+    value: ""
+    type: SECRET
+  - key: WHATSAPP_ACCESS_TOKEN
+    value: ""
+    type: SECRET
+  health_check:
+    http_path: /healthcheck
+    initial_delay_seconds: 30
+    period_seconds: 60
+  instance_count: 1
+  instance_size_slug: basic-xxs
+
+databases:
+- name: orderwhisper-db
+  engine: PG
+  production: false
+  cluster_name: orderwhisper-postgres
+  db_name: orderwhisper
+  db_user: orderwhisper 
