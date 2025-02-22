@@ -37,6 +37,11 @@
     "WHATSAPP_ACCESS_TOKEN": {
       "description": "Your WhatsApp Business API token",
       "required": true
+    },
+    "DATABASE_URL": {
+      "description": "URL for the PostgreSQL database",
+      "value": "postgres://postgres:postgres@localhost:5432/orderwhisper",
+      "required": true
     }
   },
   "formation": {
@@ -48,6 +53,12 @@
   "buildpacks": [
     {
       "url": "heroku/nodejs"
+    }
+  ],
+  "addons": [
+    {
+      "plan": "heroku-postgresql:hobby-dev",
+      "as": "DATABASE"
     }
   ]
 } 
