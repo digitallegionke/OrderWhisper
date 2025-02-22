@@ -8,9 +8,6 @@ export const config = {
   database: {
     url: process.env.DATABASE_URL || 'file:./dev.db',
   },
-  redis: {
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
-  },
   logging: {
     level: 'debug',
     format: 'development',

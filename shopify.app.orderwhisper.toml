@@ -2,7 +2,7 @@
 
 client_id = "10cd0ca9a3d009f3c94cedcd57d64839"
 extension_directories = [ ]
-application_url = "https://manitoba-bahamas-qualities-sponsorship.trycloudflare.com"
+application_url = "https://formed-nodes-spots-substantial.trycloudflare.com"
 embedded = true
 name = "OrderWhisper"
 handle = "whatsapp-notification-12"
@@ -39,9 +39,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://manitoba-bahamas-qualities-sponsorship.trycloudflare.com/auth/callback",
-  "https://manitoba-bahamas-qualities-sponsorship.trycloudflare.com/auth/shopify/callback",
-  "https://manitoba-bahamas-qualities-sponsorship.trycloudflare.com/api/auth/callback"
+  "https://formed-nodes-spots-substantial.trycloudflare.com/auth/callback",
+  "https://formed-nodes-spots-substantial.trycloudflare.com/auth/shopify/callback",
+  "https://formed-nodes-spots-substantial.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

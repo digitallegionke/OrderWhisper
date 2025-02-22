@@ -14,13 +14,14 @@ import {
 import { AppProvider } from "@shopify/shopify-app-remix/react";
 import "@shopify/polaris/build/esm/styles.css";
 import { authenticate } from "./shopify.server";
+import translations from "@shopify/polaris/locales/en.json";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
   
   return json({
     apiKey: process.env.SHOPIFY_API_KEY || "",
-    polarisTranslations: require("@shopify/polaris/locales/en.json"),
+    polarisTranslations: translations,
   });
 };
 

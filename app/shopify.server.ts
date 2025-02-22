@@ -6,10 +6,11 @@ import {
   DeliveryMethod,
   LATEST_API_VERSION,
 } from "@shopify/shopify-app-remix/server";
-import { RedisSessionStorage } from "@shopify/shopify-app-session-storage-redis";
+import { SQLiteSessionStorage } from "@shopify/shopify-app-session-storage-sqlite";
 import { config } from "../config/development";
 import { orderCreatedWebhook } from "./webhooks/orders-create";
 import { fulfillmentCreatedWebhook } from "./webhooks/fulfillments-create";
+import { join } from "path";
 
 const scopes = [
   "read_orders",
@@ -18,8 +19,10 @@ const scopes = [
   "write_fulfillments",
 ];
 
-// Initialize Redis session storage
-const sessionStorage = new RedisSessionStorage(config.redis.url);
+// Initialize SQLite session storage
+const sessionStorage = new SQLiteSessionStorage(
+  join(process.cwd(), "database.sqlite")
+);
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -38,6 +41,7 @@ const shopify = shopifyApp({
     ORDERS_CREATE: orderCreatedWebhook,
     FULFILLMENTS_CREATE: fulfillmentCreatedWebhook,
   },
+  isEmbeddedApp: true,
   future: {
     unstable_newEmbeddedAuthStrategy: true,
     removeRest: true,
