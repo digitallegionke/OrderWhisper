@@ -29,18 +29,21 @@ export default defineConfig({
     fs: {
       allow: ["app", "node_modules"],
     },
-    allowedHosts: [
-      'localhost',
-      '.trycloudflare.com',
-      'practitioner-conf-stock-perfume.trycloudflare.com',
-      'architects-lending-nowhere-legends.trycloudflare.com'
-    ],
+    allowedHosts: process.env.NODE_ENV === 'production' 
+      ? ['.shopify.com'] 
+      : ['localhost', '127.0.0.1'],
     cors: true,
     headers: {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": process.env.NODE_ENV === 'production' 
+        ? "https://*.myshopify.com" 
+        : "*",
       "Access-Control-Allow-Methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-      "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, ngrok-skip-browser-warning",
+      "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
     },
+  },
+  preview: {
+    port: 3000,
+    host: true,
   },
   plugins: [
     remix({
@@ -57,10 +60,22 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   build: {
-    cssMinify: process.env.NODE_ENV === "production",
+    cssMinify: true,
+    minify: true,
+    sourcemap: false,
     assetsInlineLimit: 0,
     rollupOptions: {
       external: ['@shopify/shopify-api'],
-    }
+      output: {
+        manualChunks: {
+          vendor: [
+            '@shopify/polaris',
+            '@shopify/app-bridge-react',
+            'react',
+            'react-dom',
+          ],
+        },
+      },
+    },
   },
 });
