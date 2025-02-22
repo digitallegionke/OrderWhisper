@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: orderwhisper
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm run docker-start
+    healthCheckPath: /healthcheck
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SHOPIFY_API_KEY
+        sync: false
+      - key: SHOPIFY_API_SECRET
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: HOST
+        value: https://orderwhisper.onrender.com
+      - key: SHOPIFY_APP_URL
+        value: https://orderwhisper.onrender.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: orderwhisper_db
+          property: connectionString
+      - key: SCOPES
+        value: read_orders,write_orders,read_fulfillments,write_fulfillments
+    autoDeploy: true
+    disk:
+      name: tmp
+      mountPath: /tmp
+      sizeGB: 1
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: ALLOWALL
+
+databases:
+  - name: orderwhisper_db
+    plan: starter
+    postgresMajorVersion: 15 

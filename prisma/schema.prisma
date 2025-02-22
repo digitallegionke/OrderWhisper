@@ -9,8 +9,8 @@ generator client {
 // enough when changing adapters.
 // See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
-  provider = "sqlite"
-  url      = "file:dev.sqlite"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Session {
@@ -29,4 +29,35 @@ model Session {
   locale        String?
   collaborator  Boolean?  @default(false)
   emailVerified Boolean?  @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model WhatsAppMessage {
+  id            String   @id @default(uuid())
+  orderId       String
+  orderNumber   String
+  customerPhone String
+  messageType   String   // 'order_created' or 'order_fulfilled'
+  status        String   // 'sent', 'delivered', 'read', 'failed'
+  message       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([orderNumber])
+  @@index([customerPhone])
+}
+
+model NotificationSettings {
+  id        String   @id @default(cuid())
+  shop      String
+  eventType String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([shop, eventType])
+  @@index([shop])
+  @@map("notification_settings")
 }

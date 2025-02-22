@@ -1,4 +1,4 @@
-import sendWhatsAppMessage from '../../helperFunctions/sendWhatsAppMessage';
+import { sendWhatsAppMessage } from "../../utils/whatsapp";
 import whatsappTemplates from '../../../config/whatsappTemplates';
 
 interface ShopifyFulfillment {
@@ -17,7 +17,7 @@ interface ShopifyFulfillment {
     };
 }
 
-export default async function fulfillmentsCreate(topic: string, shop: string, body: string) {
+export default async function fulfillmentsCreate(topic: string, shop: string, body: string, webhookId: string) {
     try {
         const fulfillment = JSON.parse(body) as ShopifyFulfillment;
         const orderId = fulfillment.order_id;
@@ -52,7 +52,10 @@ export default async function fulfillmentsCreate(topic: string, shop: string, bo
             }
 
             try {
-                await sendWhatsAppMessage(phone, message, whatsappPhoneNumberId, whatsappAccessToken);
+                await sendWhatsAppMessage({
+                    to: phone,
+                    message: message,
+                });
                 console.log(`WhatsApp message sent for order #${orderNumber} fulfillment`);
             } catch (error) {
                 // Log WhatsApp error but don't fail the webhook
@@ -65,7 +68,15 @@ export default async function fulfillmentsCreate(topic: string, shop: string, bo
 
         console.log('Successfully handled fulfillments/create webhook');
     } catch (error) {
-        console.error('Failed to handle fulfillments/create webhook:', error);
-        throw error; // Rethrow to ensure Shopify knows the webhook failed
+        console.error("Error processing fulfillment webhook:", error);
+        throw error;
     }
+}
+
+async function getOrderDetails(orderId: string, shop: string) {
+    // TODO: Implement order details retrieval using Shopify Admin API
+    return {
+        orderNumber: "placeholder",
+        customerPhone: process.env.CUSTOMER_SUPPORT_PHONE_NUMBER,
+    };
 }
