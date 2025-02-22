@@ -1,0 +1,53 @@
+{
+  "name": "OrderWhisper",
+  "description": "A Shopify app that sends WhatsApp notifications for order updates",
+  "keywords": [
+    "shopify",
+    "whatsapp",
+    "notifications",
+    "orders"
+  ],
+  "website": "https://github.com/yourusername/orderwhisper",
+  "repository": "https://github.com/yourusername/orderwhisper",
+  "env": {
+    "SHOPIFY_API_KEY": {
+      "description": "Your Shopify API key",
+      "required": true
+    },
+    "SHOPIFY_API_SECRET": {
+      "description": "Your Shopify API secret",
+      "required": true
+    },
+    "SCOPES": {
+      "description": "Required Shopify API scopes",
+      "value": "read_orders,write_orders,read_fulfillments,write_fulfillments"
+    },
+    "HOST": {
+      "description": "The URL of your app (will be set automatically by Heroku)",
+      "required": true
+    },
+    "SHOPIFY_APP_URL": {
+      "description": "The URL of your app (will be set automatically by Heroku)",
+      "required": true
+    },
+    "WHATSAPP_PHONE_NUMBER_ID": {
+      "description": "Your WhatsApp Business phone number ID",
+      "required": true
+    },
+    "WHATSAPP_ACCESS_TOKEN": {
+      "description": "Your WhatsApp Business API token",
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+} 

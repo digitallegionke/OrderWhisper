@@ -44,6 +44,21 @@ npm run dev
 
 ## Production Deployment
 
+### Option 1: Deploy to Heroku
+
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+1. Click the "Deploy to Heroku" button above
+2. Fill in the required environment variables:
+   - SHOPIFY_API_KEY: Your Shopify API key
+   - SHOPIFY_API_SECRET: Your Shopify API secret
+   - WHATSAPP_PHONE_NUMBER_ID: Your WhatsApp Business phone number ID
+   - WHATSAPP_ACCESS_TOKEN: Your WhatsApp Business API token
+3. Click "Deploy"
+4. Once deployed, update your Shopify app settings with the new Heroku URL
+
+### Option 2: Manual Deployment
+
 1. Create a production environment file:
 ```bash
 cp .env.example .env.production
@@ -66,6 +81,23 @@ npm run build
 ```bash
 npm start
 ```
+
+## Post-Deployment Steps
+
+1. Update your Shopify app settings:
+   - App URL: Your new production URL
+   - Allowed redirection URL(s): Add your production URLs
+   - Webhook endpoints: Update to use production URLs
+
+2. Test the app:
+   - Create a test order
+   - Check WhatsApp notifications
+   - Verify webhook functionality
+
+3. Monitor the app:
+   - Check server logs
+   - Monitor WhatsApp API usage
+   - Track order notifications
 
 ## Security Considerations
 
