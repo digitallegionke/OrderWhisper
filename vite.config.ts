@@ -30,10 +30,10 @@ export default defineConfig({
       allow: ["app", "node_modules"],
     },
     allowedHosts: [
-      "56e3-197-237-117-29.ngrok-free.app",
-      "architects-lending-nowhere-legends.trycloudflare.com",
-      "merger-appointment-guest-wc.trycloudflare.com",
-      "orderwhisper.myshopify.com"
+      'localhost',
+      '.trycloudflare.com',
+      'practitioner-conf-stock-perfume.trycloudflare.com',
+      'architects-lending-nowhere-legends.trycloudflare.com'
     ],
     cors: true,
     headers: {

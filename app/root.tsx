@@ -6,11 +6,26 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import {
+  AppProvider as PolarisAppProvider,
+  Frame,
+} from "@shopify/polaris";
 import { AppProvider } from "@shopify/shopify-app-remix/react";
 import "@shopify/polaris/build/esm/styles.css";
+import { authenticate } from "./shopify.server";
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  await authenticate.admin(request);
+  
+  return json({
+    apiKey: process.env.SHOPIFY_API_KEY || "",
+    polarisTranslations: require("@shopify/polaris/locales/en.json"),
+  });
+};
 
 export default function App() {
-  const data = useLoaderData<{ apiKey: string }>();
+  const { apiKey, polarisTranslations } = useLoaderData<typeof loader>();
 
   return (
     <html>
@@ -26,21 +41,16 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <AppProvider isEmbeddedApp apiKey={data.apiKey}>
-          <Outlet />
+        <AppProvider isEmbeddedApp apiKey={apiKey}>
+          <PolarisAppProvider i18n={polarisTranslations}>
+            <Frame>
+              <Outlet />
+            </Frame>
+          </PolarisAppProvider>
         </AppProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
   );
-}
-
-// Add loader to provide API key
-import { json, type LoaderFunctionArgs } from "@remix-run/node";
-
-export async function loader({ request }: LoaderFunctionArgs) {
-  return json({
-    apiKey: process.env.SHOPIFY_API_KEY || "",
-  });
 }
