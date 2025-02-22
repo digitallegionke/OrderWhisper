@@ -1,6 +1,14 @@
 {
   "name": "whatsapp-notification",
+  "version": "1.0.0",
+  "description": "A Shopify app that sends WhatsApp notifications for order updates",
   "private": true,
+  "author": "kush",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/orderwhisper.git"
+  },
   "scripts": {
     "build": "remix vite:build",
     "dev": "shopify app dev",
@@ -70,6 +78,5 @@
   },
   "overrides": {
     "@graphql-tools/url-loader": "8.0.16"
-  },
-  "author": "kush"
+  }
 }
