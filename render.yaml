@@ -19,6 +19,8 @@ services:
         sync: false
       - key: ENCRYPTION_KEY
         generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
       - key: HOST
         value: https://orderwhisper.onrender.com
       - key: SHOPIFY_APP_URL
@@ -27,11 +29,39 @@ services:
         fromDatabase:
           name: orderwhisper-db
           property: connectionString
+      - key: DATABASE_SSL
+        value: "true"
       - key: REDIS_URL
         fromService:
           name: orderwhisper-redis
           type: redis
           property: connectionString
+      - key: REDIS_SSL
+        value: "true"
+      - key: LOG_LEVEL
+        value: info
+      - key: LOG_FORMAT
+        value: json
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+      - key: WEBHOOK_RATE_LIMIT
+        value: "50"
+      - key: ENABLE_WEBHOOK_VALIDATION
+        value: "true"
+      - key: ENABLE_RATE_LIMITING
+        value: "true"
+      - key: ENABLE_MESSAGE_ENCRYPTION
+        value: "true"
+      - key: ENABLE_PERFORMANCE_MONITORING
+        value: "true"
+      - key: ENABLE_ERROR_TRACKING
+        value: "true"
+      - key: ENABLE_DEBUG_LOGGING
+        value: "false"
+      - key: ENABLE_TEST_WEBHOOKS
+        value: "false"
     autoDeploy: true
     disk:
       name: tmp
@@ -41,6 +71,15 @@ services:
       - path: /*
         name: X-Frame-Options
         value: ALLOWALL
+      - path: /*
+        name: Strict-Transport-Security
+        value: max-age=31536000; includeSubDomains
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-XSS-Protection
+        value: 1; mode=block
     scaling:
       minInstances: 1
       maxInstances: 1
