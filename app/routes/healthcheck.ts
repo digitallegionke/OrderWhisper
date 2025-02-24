@@ -30,6 +30,52 @@ async function getRedisInfo() {
     }
 }
 
+async function getRateLimitMetrics() {
+    try {
+        const redis = await getRedisClient();
+        const [
+            globalLimits,
+            webhookLimits,
+            whatsappLimits
+        ] = await Promise.all([
+            redis.keys('global_rate_limit:*'),
+            redis.keys('webhook_rate_limit:*'),
+            redis.keys('whatsapp_rate_limit:*')
+        ]);
+
+        // Get counts for rate-limited requests
+        const [
+            globalBlocked,
+            webhookBlocked,
+            whatsappBlocked
+        ] = await Promise.all([
+            redis.get('rate_limit_blocked:global').then(val => val || '0'),
+            redis.get('rate_limit_blocked:webhook').then(val => val || '0'),
+            redis.get('rate_limit_blocked:whatsapp').then(val => val || '0')
+        ]);
+
+        return {
+            global: {
+                active_limits: globalLimits.length,
+                blocked_requests: parseInt(globalBlocked, 10)
+            },
+            webhook: {
+                active_limits: webhookLimits.length,
+                blocked_requests: parseInt(webhookBlocked, 10)
+            },
+            whatsapp: {
+                active_limits: whatsappLimits.length,
+                blocked_requests: parseInt(whatsappBlocked, 10)
+            }
+        };
+    } catch (error) {
+        logger.error('Error getting rate limit metrics', error instanceof Error ? error : new Error('Unknown error'));
+        return {
+            error: error instanceof Error ? error.message : 'Unknown error'
+        };
+    }
+}
+
 export const loader: LoaderFunction = async () => {
     try {
         logger.info('Starting health check');
@@ -52,12 +98,12 @@ export const loader: LoaderFunction = async () => {
             messagesSent,
             messagesFailed,
             webhookErrors,
-            activeRateLimits
+            rateLimitMetrics
         ] = await Promise.all([
             redis.get('whatsapp_messages_sent_total'),
             redis.get('whatsapp_messages_failed_total'),
             redis.llen('webhook_errors'),
-            redis.keys('rate_limit:*')
+            getRateLimitMetrics()
         ]);
 
         const status = {
@@ -78,7 +124,7 @@ export const loader: LoaderFunction = async () => {
                 whatsapp_messages_sent: parseInt(messagesSent || '0'),
                 whatsapp_messages_failed: parseInt(messagesFailed || '0'),
                 webhook_errors: webhookErrors,
-                active_rate_limits: activeRateLimits.length
+                rate_limits: rateLimitMetrics
             },
             version: process.env.npm_package_version || '1.0.0',
             environment: process.env.NODE_ENV,
