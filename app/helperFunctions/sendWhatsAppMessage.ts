@@ -29,12 +29,14 @@ function encryptSensitiveData(data: string): string {
     }
 
     // In test environment, use a fixed key
-    const key = process.env.NODE_ENV === 'test' 
-        ? Buffer.alloc(32, 'test_key') 
-        : Buffer.from(envKey.length === 64 ? Buffer.from(envKey, 'hex') : envKey);
-
-    if (key.length !== 32) {
-        throw new Error('Invalid encryption key length. Must be 32 bytes.');
+    let key: Buffer;
+    if (process.env.NODE_ENV === 'test') {
+        key = Buffer.alloc(32).fill('test_key');
+    } else {
+        // For production, handle hex or raw key
+        key = envKey.length === 64 
+            ? Buffer.from(envKey, 'hex') 
+            : Buffer.from(envKey).slice(0, 32);
     }
 
     const iv = crypto.randomBytes(16);

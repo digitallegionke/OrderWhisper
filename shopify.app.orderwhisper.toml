@@ -1,47 +1,25 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "10cd0ca9a3d009f3c94cedcd57d64839"
-extension_directories = [ ]
-application_url = "https://et-blades-hop-hunger.trycloudflare.com"
+application_url = "https://orderwhisper.onrender.com"
 embedded = true
 name = "OrderWhisper"
 handle = "whatsapp-notification-12"
 
 [build]
-automatically_update_urls_on_dev = true
-dev_store_url = "orderwhisper.myshopify.com"
 include_config_on_deploy = true
 
 [webhooks]
 api_version = "2025-01"
 
-  [[webhooks.subscriptions]]
-  topics = [ "app/scopes_update" ]
-  uri = "/webhooks/app/scopes_update"
-
-  [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
-
-  [[webhooks.subscriptions]]
-  topics = [ "fulfillments/create" ]
-  uri = "/webhooks/fulfillments/create"
-  include_fields = [ "order_id", "order" ]
-
-  [[webhooks.subscriptions]]
-  topics = [ "orders/create" ]
-  uri = "/webhooks/orders/create"
-  include_fields = [ "id", "order_number", "customer" ]
-
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "write_products,read_orders"
 
 [auth]
 redirect_urls = [
-  "https://et-blades-hop-hunger.trycloudflare.com/auth/callback",
-  "https://et-blades-hop-hunger.trycloudflare.com/auth/shopify/callback",
-  "https://et-blades-hop-hunger.trycloudflare.com/api/auth/callback"
+  "https://orderwhisper.onrender.com/api/auth",
+  "https://orderwhisper.onrender.com/api/auth/callback"
 ]
 
 [pos]
