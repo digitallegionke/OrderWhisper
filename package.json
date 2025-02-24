@@ -10,14 +10,14 @@
     "url": "https://github.com/yourusername/orderwhisper.git"
   },
   "scripts": {
-    "build": "prisma generate && remix vite:build",
+    "build": "NODE_ENV=production prisma generate && remix vite:build",
     "dev": "shopify app dev",
     "config:link": "shopify app config link",
     "generate": "shopify app generate",
     "deploy": "shopify app deploy",
     "config:use": "shopify app config use",
     "env": "shopify app env",
-    "start": "remix-serve ./build/server/index.js",
+    "start": "NODE_ENV=production remix-serve ./build/server/index.js",
     "docker-start": "npm run setup && npm run start",
     "setup": "prisma generate && prisma migrate deploy",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
@@ -32,12 +32,12 @@
     "test:integration": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration/",
     "pretest": "cp .env.test .env",
     "postinstall": "prisma generate",
-    "prebuild": "prisma generate",
+    "prebuild": "rm -rf build && prisma generate",
     "prepare": "prisma generate"
   },
   "type": "module",
   "engines": {
-    "node": "^18.20 || ^20.10 || >=21.0.0"
+    "node": "20.10.0"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",

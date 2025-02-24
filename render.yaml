@@ -4,9 +4,13 @@ services:
     env: node
     plan: starter
     buildCommand: |
-      npm ci
+      npm cache clean --force
+      npm ci --prefer-offline --no-audit
+      npx prisma generate
       npm run build
-    startCommand: npm start
+    startCommand: |
+      npx prisma migrate deploy
+      npm start
     healthCheckPath: /healthcheck
     envVars:
       - key: NODE_VERSION
@@ -68,6 +72,10 @@ services:
         value: "false"
       - key: PORT
         value: "10000"
+      - key: NPM_CONFIG_PRODUCTION
+        value: "true"
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=1024"
     autoDeploy: true
     disk:
       name: tmp
@@ -95,7 +103,7 @@ services:
       period: 30
       timeout: 5
       failureThreshold: 3
-      gracePeriod: 120
+      gracePeriod: 300
 
   - type: redis
     name: orderwhisper-redis
