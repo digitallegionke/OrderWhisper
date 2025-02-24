@@ -10,7 +10,7 @@
     "url": "https://github.com/yourusername/orderwhisper.git"
   },
   "scripts": {
-    "build": "remix vite:build",
+    "build": "prisma generate && remix vite:build",
     "dev": "shopify app dev",
     "config:link": "shopify app config link",
     "generate": "shopify app generate",
@@ -31,7 +31,9 @@
     "test:scalability": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js tests/scalability.test.ts --runInBand",
     "test:integration": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration/",
     "pretest": "cp .env.test .env",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "prebuild": "prisma generate",
+    "prepare": "prisma generate"
   },
   "type": "module",
   "engines": {
