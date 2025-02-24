@@ -24,7 +24,13 @@
     "shopify": "shopify",
     "prisma": "prisma",
     "graphql-codegen": "graphql-codegen",
-    "vite": "vite"
+    "vite": "vite",
+    "test": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "test:scalability": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js tests/scalability.test.ts --runInBand",
+    "test:integration": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration/",
+    "pretest": "cp .env.test .env"
   },
   "type": "module",
   "engines": {
@@ -58,12 +64,17 @@
     "@remix-run/route-config": "^2.15.0",
     "@shopify/api-codegen-preset": "^1.1.1",
     "@types/eslint": "^9.6.1",
-    "@types/node": "^22.2.0",
+    "@types/ioredis": "^4.28.10",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.5",
     "@types/react": "^18.2.31",
     "@types/react-dom": "^18.2.14",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^10.0.1",
+    "jest": "^29.7.0",
     "prettier": "^3.2.4",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
     "vite": "^5.1.3"
   },
