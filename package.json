@@ -30,7 +30,8 @@
     "test:coverage": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "test:scalability": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js tests/scalability.test.ts --runInBand",
     "test:integration": "NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration/",
-    "pretest": "cp .env.test .env"
+    "pretest": "cp .env.test .env",
+    "postinstall": "prisma generate"
   },
   "type": "module",
   "engines": {
