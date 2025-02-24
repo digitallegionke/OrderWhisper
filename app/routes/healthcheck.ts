@@ -1,7 +1,5 @@
-import { Redis } from 'ioredis';
 import type { LoaderFunction } from '@remix-run/node';
-
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+import { redis } from '../lib/redis';
 
 export const loader: LoaderFunction = async () => {
     try {
@@ -34,7 +32,8 @@ export const loader: LoaderFunction = async () => {
                 whatsapp_messages_failed: parseInt(messagesFailed),
                 webhook_errors: webhookErrors
             },
-            version: process.env.npm_package_version || '1.0.0'
+            version: process.env.npm_package_version || '1.0.0',
+            environment: process.env.NODE_ENV
         };
 
         return new Response(JSON.stringify(status, null, 2), {
@@ -51,7 +50,8 @@ export const loader: LoaderFunction = async () => {
             JSON.stringify({
                 status: 'unhealthy',
                 timestamp: new Date().toISOString(),
-                error: error instanceof Error ? error.message : 'Unknown error'
+                error: error instanceof Error ? error.message : 'Unknown error',
+                environment: process.env.NODE_ENV
             }, null, 2),
             {
                 status: 503,
@@ -61,8 +61,5 @@ export const loader: LoaderFunction = async () => {
                 }
             }
         );
-    } finally {
-        // Don't keep the Redis connection open
-        redis.disconnect();
     }
 }; 

@@ -1,43 +1,72 @@
-// Simple in-memory rate limiter for webhooks
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const MAX_REQUESTS = 100; // Limit each shop to 100 requests per windowMs
+import { redis } from '../lib/redis';
 
-// In-memory store for rate limiting
-const store = new Map<string, { count: number; resetTime: number }>();
+interface RateLimitOptions {
+  windowMs?: number;
+  maxRequests?: number;
+  keyPrefix?: string;
+}
 
-export function webhookRateLimiter(shop: string): { limited: boolean; headers: Headers } {
-  const now = Date.now();
+export class RateLimiter {
+  private windowMs: number;
+  private maxRequests: number;
+  private keyPrefix: string;
 
-  // Clean up expired entries
-  for (const [key, value] of store.entries()) {
-    if (now > value.resetTime) {
-      store.delete(key);
+  constructor(options: RateLimitOptions = {}) {
+    this.windowMs = options.windowMs || 15 * 60 * 1000; // 15 minutes default
+    this.maxRequests = options.maxRequests || 100; // 100 requests default
+    this.keyPrefix = options.keyPrefix || 'rate_limit:';
+  }
+
+  public async isRateLimited(key: string): Promise<boolean> {
+    const redisKey = `${this.keyPrefix}${key}`;
+    
+    try {
+      const currentCount = await redis.incr(redisKey);
+      
+      if (currentCount === 1) {
+        await redis.expire(redisKey, Math.floor(this.windowMs / 1000));
+      }
+      
+      return currentCount > this.maxRequests;
+    } catch (error) {
+      console.error('Rate limiter error:', error);
+      return false; // Fail open on errors
     }
   }
 
-  // Get or create rate limit entry for this shop
-  let entry = store.get(shop);
-  if (!entry || now > entry.resetTime) {
-    entry = {
-      count: 0,
-      resetTime: now + WINDOW_MS,
-    };
-    store.set(shop, entry);
+  public async getRemainingRequests(key: string): Promise<number> {
+    const redisKey = `${this.keyPrefix}${key}`;
+    
+    try {
+      const currentCount = await redis.get(redisKey);
+      return Math.max(0, this.maxRequests - (parseInt(currentCount || '0', 10)));
+    } catch (error) {
+      console.error('Rate limiter error:', error);
+      return 0;
+    }
   }
 
-  // Increment request count
-  entry.count++;
-
-  // Set rate limit headers
-  const headers = new Headers({
-    "RateLimit-Limit": MAX_REQUESTS.toString(),
-    "RateLimit-Remaining": Math.max(0, MAX_REQUESTS - entry.count).toString(),
-    "RateLimit-Reset": new Date(entry.resetTime).toUTCString(),
-  });
-
-  // Check if rate limit exceeded
-  return {
-    limited: entry.count > MAX_REQUESTS,
-    headers
-  };
+  public async resetLimit(key: string): Promise<void> {
+    const redisKey = `${this.keyPrefix}${key}`;
+    await redis.del(redisKey);
+  }
 }
+
+// Create default instances for different use cases
+export const globalRateLimiter = new RateLimiter({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxRequests: 100,
+  keyPrefix: 'global_rate_limit:'
+});
+
+export const webhookRateLimiter = new RateLimiter({
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 50,
+  keyPrefix: 'webhook_rate_limit:'
+});
+
+export const whatsappRateLimiter = new RateLimiter({
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 30,
+  keyPrefix: 'whatsapp_rate_limit:'
+});
