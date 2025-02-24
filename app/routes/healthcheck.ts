@@ -1,8 +1,10 @@
 import type { LoaderFunction } from '@remix-run/node';
-import { redis } from '../lib/redis';
+import { getRedisClient } from '../lib/redis';
+import { logger } from '../lib/logger';
 
 async function getRedisInfo() {
     try {
+        const redis = await getRedisClient();
         const info = await redis.info();
         const parsedInfo = info.split('\n').reduce((acc, line) => {
             const [key, value] = line.split(':');
@@ -20,7 +22,7 @@ async function getRedisInfo() {
             uptime: parsedInfo.uptime_in_seconds
         };
     } catch (error) {
-        console.error('Error getting Redis info:', error);
+        logger.error('Error getting Redis info', error instanceof Error ? error : new Error('Unknown error'));
         return {
             status: 'error',
             error: error instanceof Error ? error.message : 'Unknown error'
@@ -30,7 +32,10 @@ async function getRedisInfo() {
 
 export const loader: LoaderFunction = async () => {
     try {
+        logger.info('Starting health check');
+        
         // Check Redis connection
+        const redis = await getRedisClient();
         await redis.ping();
         const redisInfo = await getRedisInfo();
 
@@ -80,9 +85,12 @@ export const loader: LoaderFunction = async () => {
             deployment: {
                 platform: 'render',
                 region: process.env.RENDER_REGION || 'unknown',
-                service_id: process.env.RENDER_SERVICE_ID || 'unknown'
+                service_id: process.env.RENDER_SERVICE_ID || 'unknown',
+                instance_id: process.env.RENDER_INSTANCE_ID || 'unknown'
             }
         };
+
+        logger.info('Health check completed successfully', { status: status.status });
 
         return new Response(JSON.stringify(status, null, 2), {
             status: 200,
@@ -92,7 +100,7 @@ export const loader: LoaderFunction = async () => {
             }
         });
     } catch (error) {
-        console.error('Health check failed:', error);
+        logger.error('Health check failed', error instanceof Error ? error : new Error('Unknown error'));
         
         return new Response(
             JSON.stringify({
@@ -103,7 +111,8 @@ export const loader: LoaderFunction = async () => {
                 deployment: {
                     platform: 'render',
                     region: process.env.RENDER_REGION || 'unknown',
-                    service_id: process.env.RENDER_SERVICE_ID || 'unknown'
+                    service_id: process.env.RENDER_SERVICE_ID || 'unknown',
+                    instance_id: process.env.RENDER_INSTANCE_ID || 'unknown'
                 }
             }, null, 2),
             {
